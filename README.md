@@ -7,8 +7,8 @@ Independent website and native Android app for the [Find The Cash NZ Facebook Pa
 
 ## Project contents
 
-- `site/`: responsive green-and-gold website, news and official Facebook links, winners/community stories, privacy, safety, support, an optional device-only hunt checklist and an interactive **My location** map where visitors tap to choose a pin before voluntarily emailing it to findthecashnz@gmail.com. Map pins are not publicly posted or tracked.
-- `android/`: native Android app with Home, Updates, Map, Hunt Kit and About. The Map tab loads the same HTTPS map picker as the website (no device-location permission), keeping the UI consistent.
+- `site/`: responsive green-and-gold website, news and official Facebook links, winners/community stories, privacy, safety, support, and an optional device-only hunt checklist.
+- `android/`: native Android app with Home, Updates, Hunt Kit and About; the same verified Page feed as the website.
 - `site/updates.json`: initial disconnected feed. Never guesses a current drop, location, winner or prize.
 - `scripts/sync-facebook.mjs`: optional owner-approved, read-only Meta Graph API importer.
 - `.github/workflows/`: automatic website tests, Android debug APK compilation, GitHub Pages deployment, and optional Facebook updates.
