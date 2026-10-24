@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#073e2e">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Choose any place on a map to prepare a Find The Cash NZ owner-published pin. Publishing requires an authenticated GitHub owner account.">
+<title>Choose a pin | Find The Cash NZ owner tools</title>
+<link rel="icon" href="./assets/icon-192.png">
+<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="./owner-pin-picker.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous" defer></script>
+<script type="module" src="./owner-pin-picker.js"></script>
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+<a class="brand" href="./"><img src="./assets/logo.svg" width="49" height="49" alt=""><span>FIND THE <b>CASH NZ</b><small>GOOD THINGS ARE OUT THERE</small></span></a>
+<a class="owner-home" href="./hunt-map.html">Public map ↗</a>
+</div></header>
+<main class="owner-layout container">
+<div class="owner-intro"><span class="section-kicker">OWNER PIN PREPARATION TOOL</span>
+<h1>Pin <em>anywhere.</em></h1>
+<p>Move the map anywhere in the world, tap the exact spot you choose and copy the coordinates. Then use your <strong>FRYMASTERCHEESE GitHub account</strong> to publish them so everybody can see your pin.</p></div>
+<div class="owner-grid">
+<section class="owner-map-wrap">
+<div id="owner-location-map" role="region" aria-label="World map. Click to place a pin and drag to adjust."></div>
+<p>🗺️ Zoom and tap anywhere. Drag your pin to adjust it. This map does not request your phone's GPS location.</p>
+</section>
+<aside class="owner-controls">
+<div class="owner-step">1 • SELECT A LOCATION</div>
+<h2>Chosen location</h2>
+<label for="owner-pin-coordinates">Latitude, longitude</label>
+<input id="owner-pin-coordinates" type="text" readonly value="" placeholder="Click the map to choose a pin">
+<p id="owner-picker-status" role="status" aria-live="polite">No pin selected yet.</p>
+<button type="button" id="owner-copy-coordinates" disabled>📋 Copy coordinates</button>
+<a id="owner-osm-link" target="_blank" rel="noopener noreferrer" href="https://www.openstreetmap.org/" hidden>View exact point on OpenStreetMap ↗</a>
+<div class="owner-step second">2 • PUBLISH AS CEO</div>
+<p class="owner-help">Open your private GitHub publishing workflow. Select <strong>pin</strong>, leave the <strong>Town</strong> field blank, paste your copied value into <strong>Coordinates</strong>, optionally give it a label, then press <strong>Run workflow</strong>.</p>
+<a id="owner-github-workflow" class="owner-run" href="https://github.com/FRYMASTERCHEESE/find-the-cash-nz/actions/workflows/publish-hunt-town.yml" target="_blank" rel="noopener noreferrer">🔒 Open my owner publishing control ↗</a>
+<p class="owner-privacy"><strong>Important:</strong> Only the GitHub repository owner can publish. This helper page has no login or publishing permission by itself. Your chosen coordinates are <strong>public</strong> once you publish them, and may remain in the public repository's commit history even after clearing. Never publish a private home or sensitive address unintentionally.</p>
+</aside>
+</div>
+<div class="owner-notice">💚 The public map is read-only. Publishing uses GitHub authentication, never a website password or an exposed API token. Pins expire from the public display after 12 hours, and you can clear them sooner.</div>
+</main>
+<footer class="owner-footer">Find The Cash NZ · Support: <a href="mailto:findthecashnz@gmail.com">findthecashnz@gmail.com</a></footer>
+</body>
+</html>

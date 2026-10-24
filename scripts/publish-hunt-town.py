@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Owner-initiated, single-town New Zealand map publication.
+"""Owner-initiated, NZ-town or exact global-coordinate map publication.
 
 Run ONLY from the trusted, owner-gated GitHub Actions workflow.
-Public OSMF Nominatim is consulted at most once per new, manually submitted
-town name. Repeat queries are served from the repository's local cache.
+Exact coordinates typed or selected from a map are used as-is, anywhere in
+the mapped world: NO geocoding, GPS, location API or extra permissions.
+The existing NZ town mode keeps its strictly limited single manual
+Nominatim lookup and cached results.
 https://operations.osmfoundation.org/policies/nominatim/
 """
 import json
@@ -22,6 +24,9 @@ CACHE_FILE = ROOT / "data" / "nz-town-cache.json"
 SUPPORT_EMAIL = "findthecashnz@gmail.com"
 NOMINATIM = "https://nominatim.openstreetmap.org/search"
 ACTIVE_HOURS = 12
+# OSM/Web Mercator tiles do not display regions beyond the polar cutoff.
+MAX_MAPPED_LAT = 85.0
+COORDINATES_PATTERN = re.compile(r"^\s*([+-]?\d{1,3}(?:\.\d{1,8})?)\s*,\s*([+-]?\d{1,3}(?:\.\d{1,8})?)\s*$")
 # One or two words plus optional region, including Māori macrons.
 WORD = r"[^\W\d_]+(?:[ '\u2019-][^\W\d_]+)*"
 TOWN_PATTERN = re.compile(rf"^{WORD}(?:,\s*{WORD})?$", re.UNICODE)
@@ -47,6 +52,34 @@ def safe_coordinates(lat, lon):
             isinstance(lon, (float, int)) and not isinstance(lon, bool) and
             math.isfinite(lat) and math.isfinite(lon) and
             -48.5 <= lat <= -33.0 and 165.0 <= lon <= 180.0)
+
+
+def parse_coordinates(raw):
+    """Parse a single map-copied latitude, longitude pair without geocoding."""
+    if not isinstance(raw, str):
+        raise ValueError("Choose a point on the map to get latitude, longitude")
+    match = COORDINATES_PATTERN.fullmatch(raw)
+    if not match:
+        raise ValueError("Coordinates must be latitude, longitude (e.g. -37.80956, 175.77328)")
+    lat, lon = (float(match.group(1)), float(match.group(2)))
+    if not (math.isfinite(lat) and math.isfinite(lon)
+            and -MAX_MAPPED_LAT <= lat <= MAX_MAPPED_LAT
+            and -180.0 <= lon <= 180.0):
+        raise ValueError("Coordinates are outside the viewable world map")
+    return round(lat, 6), round(lon, 6)
+
+
+def clean_pin_label(raw):
+    """Visible public label, never interpolated into HTML or a shell command."""
+    if not isinstance(raw, str):
+        raise ValueError("Invalid pin label")
+    label = " ".join(raw.strip().split())
+    if not label:
+        return "Find The Cash NZ owner pin"
+    if (len(label) > 70 or any(ord(char) < 32 for char in raw)
+            or any(char in label for char in "<>\\{}")):
+        raise ValueError("Use a short plain-text location label (70 characters maximum)")
+    return label
 
 
 def choose_settlement(results, requested):
@@ -98,7 +131,7 @@ def lookup_one_town(town, opener=urlopen):
     return choose_settlement(results, town)
 
 
-def public_record(action, now, town=None, resolver=lookup_one_town, cache=None):
+def public_record(action, now, town=None, resolver=lookup_one_town, cache=None, coordinates=None, pin_label=None):
     stamp = now.astimezone(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
     empty = {
         "active": False,
@@ -114,6 +147,22 @@ def public_record(action, now, town=None, resolver=lookup_one_town, cache=None):
         return empty
     if action != "pin":
         raise ValueError("Action must be pin or clear")
+    coordinates = coordinates.strip() if isinstance(coordinates, str) else ""
+    if coordinates:
+        if isinstance(town, str) and town.strip():
+            raise ValueError("Enter either a town name OR map coordinates, not both")
+        lat, lon = parse_coordinates(coordinates)
+        return {
+            **empty, "active": True,
+            "town": clean_pin_label(pin_label or ""),
+            "lat": lat, "lon": lon,
+            "published_at": stamp,
+            "expires_at": (now.astimezone(timezone.utc) + timedelta(hours=ACTIVE_HOURS))
+                .isoformat(timespec="seconds").replace("+00:00", "Z"),
+            "accuracy": "owner_selected_coordinates"
+        }
+    if pin_label and str(pin_label).strip():
+        raise ValueError("Custom labels are for exact map coordinates; leave label blank for town search")
     town = clean_town(town)
     key = normalize(town)
     places = (cache or {}).get("towns", {})
@@ -139,18 +188,22 @@ def public_record(action, now, town=None, resolver=lookup_one_town, cache=None):
 def main():
     action = os.environ.get("HUNT_ACTION", "pin").strip().lower()
     town = os.environ.get("HUNT_TOWN", "")
+    coordinates = os.environ.get("HUNT_COORDINATES", "")
+    pin_label = os.environ.get("HUNT_PIN_LABEL", "")
     now = datetime.now(timezone.utc)
     if action not in {"pin", "clear"}:
         raise ValueError("Action must be pin or clear")
     cache = json.loads(CACHE_FILE.read_text(encoding="utf-8"))
     if cache.get("version") != 1 or not isinstance(cache.get("towns"), dict):
         raise ValueError("Unexpected town cache format")
-    new_record = public_record(action, now, town, cache=cache)
+    new_record = public_record(action, now, town, cache=cache, coordinates=coordinates, pin_label=pin_label)
     # After all validation/geocoding, write both outputs. No public changes on lookup failures.
     PUBLIC_FILE.write_text(json.dumps(new_record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     CACHE_FILE.write_text(json.dumps(cache, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     if action == "pin":
-        print(f"Pinned APPROXIMATE NZ town centre: {new_record['town']} until {new_record['expires_at']} (no prize location)")
+        mode = new_record["accuracy"]
+        print(f"Pinned {mode}: {new_record['town']} at {new_record['lat']}, {new_record['lon']} until {new_record['expires_at']}")
+        print("This public location is owner-approved; it does not announce a confirmed hidden-cash location.")
     else:
         print("Cleared the public town pin; no location displayed.")
 

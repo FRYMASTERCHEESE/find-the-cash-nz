@@ -90,5 +90,44 @@ class OwnerHuntTownTests(unittest.TestCase):
             publisher.public_record("wrong", self.now)
 
 
+    def test_publish_any_map_location_without_geocoding(self):
+        cache = {"version": 1, "towns": {"matamata": {"town": "Matamata", "lat": -37.81, "lon": 175.78}}}
+        def never(town):
+            self.fail("Coordinate pin must never call external geocoding")
+        record = publisher.public_record(
+            "pin", self.now, town="",
+            resolver=never, cache=cache, coordinates="48.858370, 2.294481",
+            pin_label="By the Eiffel Tower"
+        )
+        self.assertEqual(record["town"], "By the Eiffel Tower")
+        self.assertEqual(record["lat"], 48.85837)
+        self.assertEqual(record["lon"], 2.294481)
+        self.assertEqual(record["accuracy"], "owner_selected_coordinates")
+        self.assertEqual(record["source"], "owner_published")
+        self.assertEqual(record["expires_at"], (self.now + timedelta(hours=12)).isoformat().replace("+00:00", "Z"))
+        self.assertEqual(list(cache["towns"]), ["matamata"], "no precise locations stored in the geocode cache")
+
+    def test_global_coordinates_are_validated(self):
+        self.assertEqual(publisher.parse_coordinates("-37.809563,175.773279"), (-37.809563,175.773279))
+        self.assertEqual(publisher.parse_coordinates("0, 0"), (0.0,0.0))
+        self.assertEqual(publisher.parse_coordinates("+40.7128, -74.0060"), (40.7128,-74.006))
+        for bad in ("", "Auckland", "1", "1;2", "90,0", "0,181",
+                    "-87.1,-120.2", "99,99", "NaN,NaN", "1,2,3", "1.000000000,2",
+                    "https://example.com", "<script>"):
+            with self.assertRaises(ValueError, msg=bad):
+                publisher.parse_coordinates(bad)
+
+    def test_custom_pin_label_and_conflicting_inputs(self):
+        self.assertEqual(publisher.clean_pin_label("  Near the river  "), "Near the river")
+        self.assertEqual(publisher.clean_pin_label(""), "Find The Cash NZ owner pin")
+        for bad in ("x"*71, "<script>", "Unsafe\nNewline", "some \\ injection"):
+            with self.assertRaises(ValueError):
+                publisher.clean_pin_label(bad)
+        with self.assertRaises(ValueError):
+            publisher.public_record("pin", self.now, town="Matamata", coordinates="0,0")
+        with self.assertRaises(ValueError):
+            publisher.public_record("pin", self.now, town="Matamata", pin_label="Different town")
+
+
 if __name__ == "__main__":
     unittest.main()
