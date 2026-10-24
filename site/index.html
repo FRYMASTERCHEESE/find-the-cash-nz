@@ -11,7 +11,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frymastercheese.github.io/find-the-cash-nz/">
 <link rel="icon" type="image/png" sizes="192x192" href="./assets/icon-192.png"><link rel="apple-touch-icon" href="./assets/icon-192.png"><link rel="manifest" href="./manifest.webmanifest">
-<link rel="stylesheet" href="./styles.css"><script src="./app.js" defer></script>
+<link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./hunt-map.css"><script src="./app.js" defer></script><script type="module" src="./hunt-map.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Find The Cash NZ","url":"https://frymastercheese.github.io/find-the-cash-nz/","email":"findthecashnz@gmail.com","sameAs":["https://www.facebook.com/FindTheCashNz/","https://www.instagram.com/findthecashnz/"]}</script>
 <title>Find The Cash NZ | Cash Hunts, Kindness & Community</title>
 </head>
@@ -22,7 +22,7 @@
 <a class="brand" href="#top" aria-label="Find The Cash NZ home"><img src="./assets/logo.svg" alt="" width="49" height="49"><span>FIND THE <b>CASH NZ</b><small>GOOD THINGS ARE OUT THERE</small></span></a>
 <button type="button" class="menu-button" id="menu-toggle" aria-controls="primary-menu" aria-expanded="false" aria-label="Open menu"><span></span><span></span><span></span></button>
 <nav class="primary-menu" id="primary-menu" aria-label="Main navigation">
-<a href="#how">How to play</a><a href="#updates">Latest</a><a href="#winners">Winners</a><a href="#about">Our story</a>
+<a href="#how">How to play</a><a href="./hunt-map.html">📍 Hunt map</a><a href="#updates">Latest</a><a href="#winners">Winners</a><a href="#about">Our story</a>
 <a class="nav-cta" href="https://www.facebook.com/FindTheCashNz/" target="_blank" rel="noopener noreferrer">Facebook ↗</a>
 </nav></div></header>
 <main id="main">
@@ -32,7 +32,7 @@
 <p class="eyebrow"><span class="pulse-dot"></span> A LITTLE KINDNESS GOES A LONG WAY 🇳🇿</p>
 <h1>Good things are <em>out there.</em></h1>
 <p class="hero-lede">Hidden cash. Unexpected surprises. Real people, real smiles. Discover a little adventure and a whole lot of heart with <strong>Find The Cash NZ.</strong></p>
-<div class="hero-actions"><a class="btn btn-gold" href="https://www.facebook.com/FindTheCashNz/" target="_blank" rel="noopener noreferrer">See official hunt updates <span>↗</span></a><a class="btn btn-ghost" href="#how">How it works ↓</a></div>
+<div class="hero-actions"><a class="btn btn-gold" href="https://www.facebook.com/FindTheCashNz/" target="_blank" rel="noopener noreferrer">See official hunt updates <span>↗</span></a><a class="btn btn-ghost" href="#how">How it works ↓</a><a class="btn btn-ghost" href="./hunt-map.html">📍 See our town map</a></div>
 <p class="small-heart">💚 Made with love in Aotearoa, New Zealand.</p>
 </div>
 <div class="hero-graphic" aria-label="Decorative fifty-dollar treasure ticket and Find The Cash NZ badge">
@@ -48,6 +48,19 @@
 <div><b>94<span>%</span></b><p>Recommend the Page <small>15 Facebook reviews</small></p></div><span class="stat-separator"></span>
 <div><b>❤️</b><p>Kindness comes first <small>Every smile matters</small></p></div>
 </section>
+<section class="section pinned-town-section" id="hunt-town">
+<div class="container pinned-town-grid">
+<div class="feature-copy">
+<span class="section-kicker">📍 FROM THE FIND THE CASH NZ OWNER</span>
+<h2>Find us <em>on the map.</em></h2>
+<p id="home-town-status" class="town-status" role="status" aria-live="polite">Checking for the current owner-pinned town…</p>
+<p>Only the owner can publish or clear a town pin. The approximate town centre is visible to everyone, but it is <strong>not a live GPS position or the location of hidden money</strong>. Always follow official Facebook posts for hunt rules and clues.</p>
+<a href="./hunt-map.html" class="btn btn-dark">🗺️ View our public hunt map ↗</a>
+</div>
+<div class="home-town-visual">
+<div id="home-town-map-panel" hidden><iframe id="home-town-map-frame" title="Map of the approximate town pinned by the Find The Cash NZ owner" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+<div id="home-town-art" class="home-town-art" aria-hidden="true">📍</div>
+</div></div></section>
 <section class="section" id="how"><div class="container">
 <div class="section-head"><span class="section-kicker">IT'S EASY TO JOIN IN</span><h2>More than a <em>treasure hunt.</em></h2><p>Find The Cash NZ is about getting out, making memories and sharing positivity with each other.</p></div>
 <div class="step-grid">

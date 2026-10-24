@@ -14,6 +14,12 @@ import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
@@ -48,7 +54,7 @@ public class MainActivity extends Activity {
         "Respect public spaces and other people",
         "Make a safe travel plan"
     };
-    private final String[] tabNames = {"🏠 Home", "📣 Updates", "🧭 Hunt kit", "💚 About"};
+    private final String[] tabNames = {"🏠 Home", "📣 Updates", "🧭 Kit", "📍 Hunt map", "💚 About"};
     // Suggestions are offline and never imply an active cash prize or hunt.
     private final String[] kindnessIdeas = {
         "Thank someone who helped you recently.",
@@ -61,17 +67,33 @@ public class MainActivity extends Activity {
     };
     private SharedPreferences preferences;
     private LinearLayout content;
+    private WebView townMapWebView;
     private int selectedTab = 0;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         preferences = getSharedPreferences("findcashnz-kit-v1", MODE_PRIVATE);
-        if (state != null) selectedTab = Math.max(0, Math.min(3, state.getInt("tab", 0)));
+        if (state != null) selectedTab = Math.max(0, Math.min(4, state.getInt("tab", 0)));
         showTab(selectedTab);
     }
     @Override protected void onSaveInstanceState(Bundle state) {
         state.putInt("tab", selectedTab);
         super.onSaveInstanceState(state);
+    }
+    // Public map is read-only. The owner's authenticated GitHub workflow publishes pins.
+    // This Android app never asks for GPS/location permission or contains editor credentials.
+    private void releaseTownMap() {
+        if (townMapWebView == null) return;
+        WebView old = townMapWebView;
+        townMapWebView = null;
+        old.stopLoading();
+        ViewParent parent = old.getParent();
+        if (parent instanceof ViewGroup) ((ViewGroup) parent).removeView(old);
+        old.destroy();
+    }
+    @Override protected void onDestroy() {
+        releaseTownMap();
+        super.onDestroy();
     }
     private int dp(float value) {
         return Math.round(value * getResources().getDisplayMetrics().density);
@@ -96,6 +118,7 @@ public class MainActivity extends Activity {
         layout.addView(space, new LinearLayout.LayoutParams(1, dp(height)));
     }
     private void showTab(int tab) {
+        releaseTownMap();
         selectedTab = tab;
         LinearLayout shell = new LinearLayout(this);
         shell.setOrientation(LinearLayout.VERTICAL);
@@ -122,13 +145,48 @@ public class MainActivity extends Activity {
         header.addView(heading);
         shell.addView(header);
 
-        ScrollView scroll = new ScrollView(this);
-        scroll.setFillViewport(true);
-        content = new LinearLayout(this);
-        content.setOrientation(LinearLayout.VERTICAL);
-        content.setPadding(dp(20), dp(26), dp(20), dp(26));
-        scroll.addView(content);
-        shell.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
+        if (tab == 3) {
+            LinearLayout mapHost = new LinearLayout(this);
+            mapHost.setOrientation(LinearLayout.VERTICAL);
+            mapHost.setPadding(dp(7), dp(10), dp(7), dp(4));
+            TextView banner = label("📍 Owner-pinned NZ town • approximate, not live GPS", 13, INK, true);
+            banner.setGravity(Gravity.CENTER_HORIZONTAL);
+            mapHost.addView(banner);
+            gap(mapHost, 7);
+            townMapWebView = new WebView(this);
+            WebSettings settings = townMapWebView.getSettings();
+            settings.setJavaScriptEnabled(true);
+            settings.setDomStorageEnabled(false);
+            settings.setAllowFileAccess(false);
+            settings.setAllowContentAccess(false);
+            settings.setGeolocationEnabled(false);
+            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+            townMapWebView.setWebViewClient(new WebViewClient() {
+                @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                    if (!request.isForMainFrame()) return false;
+                    Uri uri = request.getUrl();
+                    String scheme = uri.getScheme();
+                    String host = uri.getHost();
+                    if ("https".equalsIgnoreCase(scheme)
+                        && "frymastercheese.github.io".equalsIgnoreCase(host)
+                        && uri.getPath() != null && uri.getPath().startsWith("/find-the-cash-nz/"))
+                        return false;
+                    if ("https".equalsIgnoreCase(scheme) || "mailto".equalsIgnoreCase(scheme)) open(uri.toString());
+                    return true;
+                }
+            });
+            mapHost.addView(townMapWebView, new LinearLayout.LayoutParams(-1, 0, 1));
+            shell.addView(mapHost, new LinearLayout.LayoutParams(-1, 0, 1));
+            townMapWebView.loadUrl(SITE + "hunt-map.html");
+        } else {
+            ScrollView scroll = new ScrollView(this);
+            scroll.setFillViewport(true);
+            content = new LinearLayout(this);
+            content.setOrientation(LinearLayout.VERTICAL);
+            content.setPadding(dp(20), dp(26), dp(20), dp(26));
+            scroll.addView(content);
+            shell.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
+        }
 
         LinearLayout bottom = new LinearLayout(this);
         bottom.setOrientation(LinearLayout.HORIZONTAL);
@@ -147,7 +205,8 @@ public class MainActivity extends Activity {
         switch(tab) {
             case 1: renderUpdates(); break;
             case 2: renderKit(); break;
-            case 3: renderAbout(); break;
+            case 3: break; // The secure, read-only public map WebView is already shown above.
+            case 4: renderAbout(); break;
             default: renderHome();
         }
     }
@@ -212,6 +271,7 @@ public class MainActivity extends Activity {
         gap(content, 23);
         button("💚 Open official Facebook", true, () -> open(FB));
         button("🎬 Watch hunt reels", false, () -> open(REELS));
+        button("📍 See owner-pinned hunt town", true, () -> showTab(3));
         gap(content, 14);
         sectionLabel("THE COMMUNITY");
         title("A little adventure.\nA lot of heart.");
@@ -255,6 +315,7 @@ public class MainActivity extends Activity {
         paragraph("Official announcements live on Facebook. This app shows a Page feed here only when owner-authorized syncing is enabled.");
         button("Open Find The Cash NZ Facebook ↗", true, () -> open(FB));
         button("Watch Reels ↗", false, () -> open(REELS));
+        button("📍 Open the current town map", false, () -> showTab(3));
         gap(content, 16);
         final TextView state = label("Checking owner-approved updates…", 13, MUTED, false);
         content.addView(state);
@@ -343,6 +404,7 @@ public class MainActivity extends Activity {
         gap(content, 10);
         card("Look after each other", "Never trespass, enter unsafe areas, drive distracted or publish other people's photos without permission. Children should hunt with responsible adults.", "💚");
         button("Check real hunt announcements ↗", true, () -> open(FB));
+        button("📍 Check the owner-pinned town map", false, () -> showTab(3));
     }
     private void renderAbout() {
         sectionLabel("FROM AOTEAROA, WITH LOVE");
@@ -365,7 +427,7 @@ public class MainActivity extends Activity {
             try {startActivity(mail);} catch(Exception ignored) {open(SITE);}
         });
         gap(content, 10);
-        paragraph("Privacy: no login, tracking location or bank details. The hunt checklist stays on this phone. Facebook content remains on its original platform.");
+        paragraph("Privacy: no login, personal location tracking or bank details. The public town map only shows an approximate owner-pinned city. The hunt checklist stays on this phone.");
     }
     private String safeFacebookUrl(String input) {
         try {

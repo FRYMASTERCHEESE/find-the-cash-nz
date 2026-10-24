@@ -14,5 +14,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Test website and Page feed safety
+      - name: Test website, owner map and Page feed safety
         run: npm run check
+      - name: Test single-town publishing without live geocoding
+        run: python3 -m unittest discover -s tests -p 'test_hunt_town.py' -v

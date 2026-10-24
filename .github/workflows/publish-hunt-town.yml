@@ -1,0 +1,73 @@
+name: Owner only - Publish Find The Cash NZ town pin
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Publish a town, or clear the public pin'
+        required: true
+        type: choice
+        options:
+          - pin
+          - clear
+        default: pin
+      town:
+        description: 'NZ town or city (e.g. Matamata, Tokoroa, Cambridge)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+# Serialise public Pages deploys and keep every deliberately triggered owner update.
+concurrency:
+  group: find-the-cash-pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Enforce actual GitHub owner, not a public-page password
+        env:
+          TRIGGER_ACTOR: ${{ github.actor }}
+          TRIGGER_REPOSITORY: ${{ github.repository }}
+          TRIGGER_REF: ${{ github.ref }}
+        run: |
+          if [[ "$TRIGGER_ACTOR" != "FRYMASTERCHEESE" || "$TRIGGER_REPOSITORY" != "FRYMASTERCHEESE/find-the-cash-nz" || "$TRIGGER_REF" != "refs/heads/main" ]]; then
+            echo "Only the GitHub repository owner on main may publish a hunt town." >&2
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Resolve one manually submitted town, or clear public pin
+        env:
+          HUNT_ACTION: ${{ inputs.action }}
+          HUNT_TOWN: ${{ inputs.town }}
+        run: python3 scripts/publish-hunt-town.py
+      - name: Commit publicly approved, broad town centre only
+        run: |
+          git config user.name "Find The Cash NZ owner pin bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/hunt-location.json data/nz-town-cache.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Update owner-approved public hunt town pin"
+            git push origin HEAD:main
+          fi
+      # GITHUB_TOKEN-created pushes DO NOT trigger normal push workflows.
+      # Deploy explicitly in THIS workflow so the public map really updates.
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
