@@ -2,6 +2,9 @@ package nz.findthecash.app;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Build;
+import android.graphics.Insets;
+import android.view.WindowInsets;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
@@ -46,6 +49,16 @@ public class MainActivity extends Activity {
         "Make a safe travel plan"
     };
     private final String[] tabNames = {"🏠 Home", "📣 Updates", "🧭 Hunt kit", "💚 About"};
+    // Suggestions are offline and never imply an active cash prize or hunt.
+    private final String[] kindnessIdeas = {
+        "Thank someone who helped you recently.",
+        "Offer a genuine compliment to somebody today.",
+        "Check in with a friend or neighbour.",
+        "Pick up a piece of litter only where it is safe.",
+        "Share a positive message with someone feeling down.",
+        "Help someone who needs an extra hand.",
+        "Support a small local business when you can."
+    };
     private SharedPreferences preferences;
     private LinearLayout content;
     private int selectedTab = 0;
@@ -87,6 +100,16 @@ public class MainActivity extends Activity {
         LinearLayout shell = new LinearLayout(this);
         shell.setOrientation(LinearLayout.VERTICAL);
         shell.setBackgroundColor(CREAM);
+        // Android 15+ draws edge-to-edge: keep bottom navigation and header
+        // outside the gesture navigation area and behind no system cutouts.
+        if (Build.VERSION.SDK_INT >= 35) {
+            shell.setOnApplyWindowInsetsListener((view, insets) -> {
+                Insets safe = insets.getInsets(
+                    WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+                view.setPadding(safe.left, safe.top, safe.right, safe.bottom);
+                return insets;
+            });
+        }
         LinearLayout header = new LinearLayout(this);
         header.setOrientation(LinearLayout.HORIZONTAL);
         header.setGravity(Gravity.CENTER_VERTICAL);
@@ -196,6 +219,33 @@ public class MainActivity extends Activity {
         card("01 • Follow along", "Official Facebook posts contain the real announcements and any latest clues.", "📱");
         card("02 • Find the clues", "Only start a hunt after checking the official post, the prize and the rules.", "🔎");
         card("03 • Share the joy", "If you find a surprise, celebrate in the original post if you're comfortable.", "🎉");
+        gap(content, 22);
+        sectionLabel("YOUR DAILY KINDNESS IDEA");
+        TextView idea = label("", 17, INK, true);
+        idea.setPadding(dp(20), dp(20), dp(20), dp(20));
+        idea.setBackground(background(0xFFF9EDCE, 18));
+        int start = preferences.getInt("kindness_idea", 0);
+        idea.setText("💛 " + kindnessIdeas[Math.floorMod(start, kindnessIdeas.length)]);
+        content.addView(idea);
+        gap(content, 10);
+        button("Show another kindness idea ✨", false, () -> {
+            int index = (preferences.getInt("kindness_idea", 0) + 1) % kindnessIdeas.length;
+            preferences.edit().putInt("kindness_idea", index).apply();
+            idea.setText("💛 " + kindnessIdeas[index]);
+        });
+        TextView kindnessProgress = label("", 13, GREEN, true);
+        content.addView(kindnessProgress);
+        Runnable refreshKindness = () -> {
+            String today = java.time.LocalDate.now().toString();
+            kindnessProgress.setText(today.equals(preferences.getString("kindness_today", ""))
+                ? "💚 You celebrated a kind moment today!"
+                : "Try a little kindness today. Every action counts.");
+        };
+        refreshKindness.run();
+        button("I did a kind thing today 💚", true, () -> {
+            preferences.edit().putString("kindness_today", java.time.LocalDate.now().toString()).apply();
+            refreshKindness.run();
+        });
         gap(content, 10);
         paragraph("No active cash drop is being claimed by this app. For current details, always check the official Page.");
     }

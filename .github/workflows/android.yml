@@ -29,8 +29,9 @@ jobs:
           "$SDKMANAGER" --sdk_root="$SDKROOT" --version
           yes | "$SDKMANAGER" --sdk_root="$SDKROOT" --licenses >/dev/null || true
           "$SDKMANAGER" --sdk_root="$SDKROOT" "platforms;android-36" "build-tools;36.0.0"
-      - name: Assemble native Android debug APK
-        run: gradle -p android :app:assembleDebug --no-daemon
+      - name: Validate debug app, release lint and unsigned Play bundle
+        # The unsigned CI bundle is NOT suitable for Play Console upload.
+        run: gradle -p android :app:assembleDebug :app:lintRelease :app:bundleRelease --no-daemon
       - name: Attach test APK
         if: success()
         uses: actions/upload-artifact@v4
