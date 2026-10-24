@@ -39,3 +39,11 @@ jobs:
           name: FindTheCashNZ-debug-APK
           path: android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+      - name: Export validation-only unsigned release bundle for secure offline signing
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: FindTheCashNZ-UNSIGNED-AAB
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 5
+          if-no-files-found: error
