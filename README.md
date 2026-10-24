@@ -7,11 +7,13 @@ Independent website and native Android app for the [Find The Cash NZ Facebook Pa
 
 ## Project contents
 
-- `site/`: responsive green-and-gold website, news and official Facebook links, winners/community stories, privacy, safety, support, and an optional device-only hunt checklist.
-- `android/`: native Android app with Home, Updates, Hunt Kit and About; the same verified Page feed as the website.
-- `site/updates.json`: initial disconnected feed. Never guesses a current drop, location, winner or prize.
+- `site/`: public website, safety/support, device-only checklist, and read-only **owner-pinned NZ town map** shared with Android (no public edit permissions).
+- `android/`: native Android app with Home, Updates, Hunt Kit, Hunt Map and About; the same read-only public map and updates as the website.
+- `site/updates.json`: initial disconnected Facebook feed. No invented clues or prizes.
+- `site/hunt-location.json`: initially inactive town-level pin; only published through the authenticated owner-only GitHub Actions workflow, expires after 12 hours, and never claims an exact cash drop.
 - `scripts/sync-facebook.mjs`: optional owner-approved, read-only Meta Graph API importer.
-- `.github/workflows/`: automatic website tests, Android debug APK compilation, GitHub Pages deployment, and optional Facebook updates.
+- `.github/workflows/`: automatic website tests, Android builds, Pages deployment, and an owner-initiated **Publish Hunt Town Pin** workflow that converts a typed city into an approximate public map pin. Owner account must be **FRYMASTERCHEESE**, public users cannot publish.
+- [Owner town publisher instructions](docs/OWNER-HUNT-TOWN.md) · [Public hunt map](https://frymastercheese.github.io/find-the-cash-nz/hunt-map.html).
 - `docs/`: launch and Meta setup information.
 
 The website requires a successful GitHub Pages deployment, and GitHub Settings → Pages should use **GitHub Actions** as its source. Android debug APKs are for testing only; a Google Play release still requires device tests, a signed AAB and Play Console review. Meta Page updates do not sync until the owner authorizes Page access.
