@@ -1,0 +1,75 @@
+name: Google Play listing artwork and real Android screenshots
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/make-play-artwork.py'
+      - 'scripts/capture-play-screenshots.sh'
+      - 'scripts/validate-play-media.py'
+      - '.github/workflows/play-media.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  artwork:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m pip install pillow==11.3.0
+      - run: python3 scripts/make-play-artwork.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FindTheCashNZ-Play-Store-Graphics
+          path: |
+            play-assets/icon-512.png
+            play-assets/feature-graphic.png
+          if-no-files-found: error
+  screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m pip install pillow==11.3.0
+      - name: Install Android API 36 for Gradle
+        shell: bash
+        run: |
+          SDKROOT="/usr/local/lib/android/sdk"
+          SDKMANAGER="$(find "$SDKROOT/cmdline-tools" -type f -name sdkmanager -print -quit)"
+          test -x "$SDKMANAGER"
+          echo "ANDROID_HOME=$SDKROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDKROOT" >> "$GITHUB_ENV"
+          "$SDKMANAGER" --sdk_root="$SDKROOT" "platforms;android-36" "build-tools;36.0.0"
+      - name: Build native debug app for actual screenshots
+        run: gradle -p android :app:assembleDebug --no-daemon
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          profile: pixel_5
+          cores: 2
+          ram-size: 2048M
+          heap-size: 512M
+          disk-size: 6000M
+          script: |
+            python3 scripts/make-play-artwork.py
+            bash scripts/capture-play-screenshots.sh
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: FindTheCashNZ-REAL-Android-Screenshots
+          path: play-assets/screenshots/*.png
+          if-no-files-found: error

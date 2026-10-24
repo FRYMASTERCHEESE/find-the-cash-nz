@@ -1,0 +1,70 @@
+name: Build signed Find The Cash NZ Google Play bundle
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  signed-app-bundle:
+    runs-on: ubuntu-latest
+    env:
+      FTCNZ_UPLOAD_KEYSTORE_BASE64: ${{ secrets.FTCNZ_UPLOAD_KEYSTORE_BASE64 }}
+      FTCNZ_UPLOAD_STORE_PASSWORD: ${{ secrets.FTCNZ_UPLOAD_STORE_PASSWORD }}
+      FTCNZ_UPLOAD_KEY_ALIAS: ${{ secrets.FTCNZ_UPLOAD_KEY_ALIAS }}
+      FTCNZ_UPLOAD_KEY_PASSWORD: ${{ secrets.FTCNZ_UPLOAD_KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - name: Verify private upload signing configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$FTCNZ_UPLOAD_KEYSTORE_BASE64" ] || [ -z "$FTCNZ_UPLOAD_STORE_PASSWORD" ] || [ -z "$FTCNZ_UPLOAD_KEY_ALIAS" ] || [ -z "$FTCNZ_UPLOAD_KEY_PASSWORD" ]; then
+            echo "::error::Release signing is not configured. Add the four FTCNZ_UPLOAD_* secrets described in docs/GOOGLE-PLAY-RELEASE.md. No Play bundle has been produced."
+            exit 1
+          fi
+      - name: Restore private keystore outside repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          KEY_FILE="$RUNNER_TEMP/findthecashnz-upload.jks"
+          printf '%s' "$FTCNZ_UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$KEY_FILE"
+          test -s "$KEY_FILE"
+          echo "FTCNZ_UPLOAD_KEYSTORE_FILE=$KEY_FILE" >> "$GITHUB_ENV"
+      - name: Install Android SDK 36
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDKROOT="/usr/local/lib/android/sdk"
+          SDKMANAGER="$(find "$SDKROOT/cmdline-tools" -type f -name sdkmanager -print -quit)"
+          test -x "$SDKMANAGER"
+          echo "ANDROID_HOME=$SDKROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDKROOT" >> "$GITHUB_ENV"
+          "$SDKMANAGER" --sdk_root="$SDKROOT" "platforms;android-36" "build-tools;36.0.0"
+      - name: Assemble signed Play App Bundle
+        run: gradle -p android :app:bundleRelease --no-daemon
+      - name: Verify bundle signature before release
+        shell: bash
+        run: |
+          set -euo pipefail
+          BUNDLE="android/app/build/outputs/bundle/release/app-release.aab"
+          test -s "$BUNDLE"
+          jarsigner -verify -strict -certs "$BUNDLE"
+          sha256sum "$BUNDLE"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FindTheCashNZ-SIGNED-Play-AAB-v1
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 30
+          if-no-files-found: error
+      - name: Remove restored keystore
+        if: always()
+        shell: bash
+        run: |
+          rm -f "$RUNNER_TEMP/findthecashnz-upload.jks"

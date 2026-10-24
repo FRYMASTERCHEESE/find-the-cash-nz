@@ -1,15 +1,39 @@
 plugins {
     id 'com.android.application'
 }
+
+// Google Play release credentials are provided only at build time.
+// The public CI can validate an unsigned bundle. Only the manual signing
+// workflow produces a bundle suitable for upload to Play Console.
+def uploadStorePath = System.getenv('FTCNZ_UPLOAD_KEYSTORE_FILE')?.trim()
+def uploadStorePassword = System.getenv('FTCNZ_UPLOAD_STORE_PASSWORD')?.trim()
+def uploadKeyAlias = System.getenv('FTCNZ_UPLOAD_KEY_ALIAS')?.trim()
+def uploadKeyPassword = System.getenv('FTCNZ_UPLOAD_KEY_PASSWORD')?.trim()
+def signingValues = [uploadStorePath,uploadStorePassword,uploadKeyAlias,uploadKeyPassword]
+def signingEnabled = signingValues.every { it != null && !it.isEmpty() }
+if (!signingEnabled && signingValues.any { it != null && !it.isEmpty() }) {
+    throw new GradleException('Incomplete Google Play upload signing configuration')
+}
 android {
     namespace 'nz.findthecash.app'
     compileSdk 36
+
     defaultConfig {
         applicationId 'nz.findthecash.app'
         minSdk 26
         targetSdk 36
         versionCode 1
         versionName '1.0.0'
+    }
+    signingConfigs {
+        if (signingEnabled) {
+            playUpload {
+                storeFile file(uploadStorePath)
+                storePassword uploadStorePassword
+                keyAlias uploadKeyAlias
+                keyPassword uploadKeyPassword
+            }
+        }
     }
     buildTypes {
         debug {
@@ -19,6 +43,7 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (signingEnabled) signingConfig signingConfigs.playUpload
         }
     }
     compileOptions {
