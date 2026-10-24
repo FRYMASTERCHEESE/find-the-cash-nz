@@ -1,0 +1,27 @@
+.owner-layout{padding-top:48px;padding-bottom:70px}
+.owner-intro{max-width:850px;margin:0 auto 30px;text-align:center}
+.owner-intro h1{font-size:clamp(3rem,6vw,5rem);margin:10px 0 16px}
+.owner-intro h1 em{color:#ba8c23}
+.owner-intro p{font-size:15px;color:var(--muted)}
+.owner-home{color:var(--gold);font-size:14px;font-weight:800}
+.owner-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr);gap:21px}
+.owner-map-wrap,.owner-controls{padding:17px;background:white;border:1px solid var(--border);border-radius:24px;box-shadow:var(--shadow);min-width:0}
+#owner-location-map{height:clamp(400px,63vh,620px);background:#dfe9dc;border-radius:16px;z-index:0}
+.owner-map-wrap p{font-size:12px;color:var(--muted);margin:14px 3px 0}
+.owner-controls{padding:23px}
+.owner-controls h2{font-size:1.6rem;margin:9px 0 14px}
+.owner-controls label{font-weight:800;font-size:13px}
+.owner-controls input{display:block;width:100%;font:inherit;padding:12px;border:1px solid #aec8b0;border-radius:12px;margin:8px 0}
+.owner-step{font-size:11px;font-weight:900;letter-spacing:.13em;color:var(--green2)}
+.owner-step.second{margin:25px 0 10px}
+.owner-controls button,.owner-run{border:0;border-radius:14px;padding:14px 16px;font:inherit;font-size:14px;font-weight:800;display:block;width:100%;text-align:center;background:var(--green);color:white}
+.owner-controls button:disabled{opacity:.5;cursor:not-allowed}
+.owner-controls button:not(:disabled){cursor:pointer}
+.owner-help,.owner-privacy,.owner-controls #owner-picker-status{font-size:13px;line-height:1.7;color:var(--muted)}
+.owner-privacy{margin:20px 0 0;background:#fff8e8;padding:14px;border-radius:12px}
+#owner-osm-link{display:block;margin:10px 0;color:var(--green2);font-size:13px;text-decoration:underline;font-weight:800}
+.owner-notice{background:#f7edd2;padding:18px 22px;margin-top:22px;border-radius:14px;font-size:13px;line-height:1.7}
+.owner-footer{text-align:center;padding:30px;background:var(--deep);color:var(--gold);font-size:13px}
+.owner-footer a{text-decoration:underline}
+[hidden]{display:none!important}
+@media(max-width:850px){.owner-grid{grid-template-columns:1fr}.owner-layout{padding:30px 16px}#owner-location-map{height:50vh;min-height:320px}}
