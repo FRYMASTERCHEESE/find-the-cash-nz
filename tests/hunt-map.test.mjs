@@ -8,7 +8,7 @@ const now = Date.parse('2026-10-24T08:00:00Z');
 const active = {
   active:true, town:'Matamata', lat:-37.81, lon:175.78,
   source:'owner_published', accuracy:'approximate_town_centre',
-  published_at:'2026-10-24T07:00:00Z', expires_at:'2026-10-24T19:00:00Z'
+  published_at:'2026-10-24T07:00:00Z', expires_at:'2099-10-24T19:00:00Z'
 };
 
 test('Only fresh owner-published town centres are shown', () => {
