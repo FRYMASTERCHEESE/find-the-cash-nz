@@ -1,10 +1,11 @@
-name: Build signed Find The Cash NZ Google Play bundle
+name: Build Find The Cash NZ CLOSED TESTING signed AAB
 on:
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   signed-app-bundle:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     env:
       FTCNZ_UPLOAD_KEYSTORE_BASE64: ${{ secrets.FTCNZ_UPLOAD_KEYSTORE_BASE64 }}
@@ -47,7 +48,7 @@ jobs:
           echo "ANDROID_HOME=$SDKROOT" >> "$GITHUB_ENV"
           echo "ANDROID_SDK_ROOT=$SDKROOT" >> "$GITHUB_ENV"
           "$SDKMANAGER" --sdk_root="$SDKROOT" "platforms;android-36" "build-tools;36.0.0"
-      - name: Assemble signed Play App Bundle
+      - name: Assemble signed AAB for Closed testing ONLY
         run: gradle -p android :app:bundleRelease --no-daemon
       - name: Verify bundle signature before release
         shell: bash
@@ -59,10 +60,11 @@ jobs:
           sha256sum "$BUNDLE"
       - uses: actions/upload-artifact@v4
         with:
-          name: FindTheCashNZ-SIGNED-Play-AAB-v1
+          name: FindTheCashNZ-CLOSED-TEST-AAB-v1
           path: android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
           if-no-files-found: error
+      # This workflow only builds an artifact. It NEVER uploads to any Play track.
       - name: Remove restored keystore
         if: always()
         shell: bash

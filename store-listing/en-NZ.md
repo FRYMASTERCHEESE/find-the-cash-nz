@@ -30,6 +30,13 @@ Privacy: https://frymastercheese.github.io/find-the-cash-nz/privacy.html
 **Suggested category**
 Lifestyle (confirm in Play Console).
 
+**Google Play support email — required**
+findthecashnz@gmail.com
+
+**Closed testing — selected distribution**
+Closed testing ONLY. Do not submit to Internal testing, Open testing or Production.
+Tester feedback email: findthecashnz@gmail.com
+
 **Contact**
 Email: findthecashnz@gmail.com
 Website: https://frymastercheese.github.io/find-the-cash-nz/

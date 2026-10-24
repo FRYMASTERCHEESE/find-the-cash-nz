@@ -34,3 +34,26 @@ test('public privacy policy does not reintroduce removed social links', async ()
   assert.ok(activity.includes('Privacy policy ↗'));
   assert.ok(privacy.includes('How long information is kept and how to delete it'));
 });
+
+
+test('closed testing is the only intended Play distribution track', async () => {
+ const wf = await read('.github/workflows/play-release.yml');
+ const listing = await read('store-listing/en-NZ.md');
+ const guide = await read('docs/GOOGLE-PLAY-RELEASE.md');
+ assert.match(wf, /CLOSED TESTING signed AAB/);
+ assert.match(wf, /github\.ref == 'refs\/heads\/main'/);
+ assert.match(wf, /FindTheCashNZ-CLOSED-TEST-AAB-v1/);
+ assert.doesNotMatch(wf, /upload-google-play|:app:publish|tracks:.*production|track:\\s*production/);
+ assert.match(listing, /Closed testing ONLY/);
+ assert.match(guide, /CLOSED TESTING ONLY/);
+});
+
+test('support email appears in native app, strings and Google Play listing', async () => {
+ const java = await read('android/app/src/main/java/nz/findthecash/app/MainActivity.java');
+ const xml = await read('android/app/src/main/res/values/strings.xml');
+ const listing = await read('store-listing/en-NZ.md');
+ assert.match(java, /getString\(R\.string\.support_email\)/);
+ assert.match(java, /Email app support and tester feedback/);
+ assert.match(xml, /findthecashnz@gmail\.com/);
+ assert.match(listing, /findthecashnz@gmail\.com/);
+});
