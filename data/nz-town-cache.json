@@ -1,4 +1,10 @@
 {
-  "version": 1,
-  "towns": {}
+  "towns": {
+    "matamata": {
+      "lat": -37.80956,
+      "lon": 175.77328,
+      "town": "Matamata"
+    }
+  },
+  "version": 1
 }
