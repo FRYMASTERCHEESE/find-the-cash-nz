@@ -12,6 +12,12 @@ test('Page homepage contains proper landmarks and researched official links',asy
  for(const token of ['<html lang="en-NZ">','<main id="main">','Find The Cash NZ','https://www.facebook.com/FindTheCashNz/','https://www.instagram.com/findthecashnz/','findthecashnz@gmail.com','privacy.html','safety.html','terms.html'])
  assert.ok(h.includes(token),token);
 });
+test('public site links to Facebook and Instagram only, not YouTube or TikTok',async()=>{
+ const html=await read('index.html');
+ assert.match(html,/https:\/\/www\.facebook\.com\/FindTheCashNz\//);
+ assert.match(html,/https:\/\/www\.instagram\.com\/findthecashnz\//);
+ assert.doesNotMatch(html,/youtube|tiktok/i);
+});
 test('No fake live hunts: Page updates are disconnected until owner approved',async()=>{
  const feed=JSON.parse(await read('updates.json'));
  assert.equal(feed.connected,false);assert.deepEqual(feed.posts,[]);
