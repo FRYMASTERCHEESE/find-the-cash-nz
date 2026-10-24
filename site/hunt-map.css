@@ -1,0 +1,27 @@
+.town-page{padding-top:clamp(30px,5vw,65px);padding-bottom:70px}
+.town-intro{text-align:center;max-width:780px;margin:0 auto 32px}
+.town-intro h1{font-size:clamp(2.8rem,6vw,4.6rem);margin:14px 0 16px}
+.town-intro h1 em{color:#b78b22}
+.town-intro p{color:var(--muted);font-size:15px;line-height:1.8}
+.town-home-link{font-weight:800;font-size:13px;color:#f8d879}
+.town-home-link:hover{text-decoration:underline}
+.town-map-panel{background:white;border-radius:23px;border:1px solid var(--border);padding:18px;box-shadow:var(--shadow)}
+.town-map-meta{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px 24px;padding:12px 5px 20px}
+.town-eyebrow{font-size:11px;font-weight:900;letter-spacing:.14em;color:var(--green2)}
+.town-map-meta h2{font-size:clamp(1.7rem,3vw,2.8rem);margin:8px 0 0}
+.town-map-meta p{color:var(--green2);font-weight:700;font-size:13px;max-width:360px}
+#town-map-frame{width:100%;height:clamp(340px,57vh,590px);background:#e4eddd;border:1px solid #d3dfce;border-radius:15px;display:block}
+.town-map-attribution,.town-expiry{font-size:12px;color:var(--muted);margin:16px 4px}
+.town-map-attribution a,.town-notice a{color:var(--green2);text-decoration:underline;font-weight:800}
+.town-notice{margin-top:20px;background:#fbefd5;padding:23px;border-radius:16px;line-height:1.8;font-size:14px}
+.map-footer{background:var(--deep);color:#f9e4b5;display:flex;justify-content:center;gap:20px;padding:27px 20px;flex-wrap:wrap;font-size:13px;text-align:center}
+.map-footer a{text-decoration:underline}
+.pinned-town-section{background:#f6f8ee}
+.pinned-town-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:35px;align-items:center}
+.pinned-town-grid h2{font-size:clamp(2.3rem,4vw,3.5rem);margin:12px 0}
+.pinned-town-grid p{color:var(--muted)}
+.pinned-town-grid .town-status{font-weight:800;color:var(--green2);min-height:25px}
+.pinned-town-grid iframe{width:100%;height:280px;border:1px solid #d9e6d8;border-radius:18px}
+.home-town-art{display:flex;align-items:center;justify-content:center;min-height:280px;background:radial-gradient(circle,#367d55,#073e2e);border-radius:26px;color:#f2cb6c;font-size:86px}
+#home-town-map-panel[hidden],#town-map-full-link[hidden],[hidden]{display:none!important}
+@media(max-width:760px){.pinned-town-grid{grid-template-columns:1fr;gap:20px}.pinned-town-grid iframe{height:250px}.town-map-meta{display:block}.town-map-meta p{margin-top:12px}.town-page{padding-left:16px;padding-right:16px}}
