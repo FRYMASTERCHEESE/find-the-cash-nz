@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073e2e">
-<meta name="description" content="See the approximate New Zealand town publicly pinned by the Find The Cash NZ owner. Only the owner can change the map; no exact drop locations shown.">
+<meta name="description" content="See a location anywhere on the map published by the Find The Cash NZ owner. Only the owner can publish or clear the pin.">
 <meta property="og:title" content="Find The Cash NZ — Owner-pinned town map">
-<meta property="og:description" content="See Find The Cash NZ's approximate owner-pinned town and check Facebook for official hunt rules.">
+<meta property="og:description" content="See a location pinned by the Find The Cash NZ owner and check Facebook for official hunt rules.">
 <link rel="canonical" href="https://frymastercheese.github.io/find-the-cash-nz/hunt-map.html">
 <link rel="icon" type="image/png" href="./assets/icon-192.png">
 <link rel="stylesheet" href="./styles.css">
 <link rel="stylesheet" href="./hunt-map.css">
 <script type="module" src="./hunt-map.js"></script>
-<title>Owner-pinned hunt town map | Find The Cash NZ</title>
+<title>Owner-pinned location map | Find The Cash NZ</title>
 </head>
 <body>
-<a class="skip" href="#main">Skip to the owner-pinned town map</a>
+<a class="skip" href="#main">Skip to the owner-pinned location map</a>
 <header class="site-header"><div class="container header-inner">
 <a class="brand" href="./" aria-label="Find The Cash NZ home"><img src="./assets/logo.svg" alt="" width="49" height="49"><span>FIND THE <b>CASH NZ</b><small>GOOD THINGS ARE OUT THERE</small></span></a>
 <a class="town-home-link" href="./">← Back to home</a>
@@ -23,21 +23,21 @@
 <div class="town-intro">
 <span class="section-kicker">OWNER-PUBLISHED • NEW ZEALAND 🇳🇿</span>
 <h1>Where is Find The <em>Cash NZ?</em></h1>
-<p>A community map showing only an approximate town or city <strong>chosen by the owner</strong>. This is not live GPS tracking, and it does not show where cash is hidden.</p>
+<p>A community map showing the place <strong>chosen and published by the owner</strong>. It can be an exact map pin anywhere or a broad New Zealand town centre. This is not live GPS tracking.</p>
 </div>
-<section class="town-map-panel" aria-label="Official owner-pinned town map">
+<section class="town-map-panel" aria-label="Official owner-pinned location map">
 <div class="town-map-meta">
 <div><span class="town-eyebrow">📍 CURRENT OWNER PIN</span>
 <h2 id="town-map-label">Checking for an owner-published pin…</h2></div>
 <p id="town-map-status" role="status" aria-live="polite">Checking the latest owner-posted town…</p>
 </div>
-<iframe id="town-map-frame" title="Interactive OpenStreetMap map showing the current owner-pinned New Zealand town"
+<iframe id="town-map-frame" title="Interactive OpenStreetMap map showing the current owner-selected location"
 loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p class="town-map-attribution">Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>. Town-centre pins are approximate.</p>
+<p class="town-map-attribution">Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>. Pins from a typed NZ town are approximate; coordinate pins mark the chosen map spot.</p>
 <p id="town-map-expiry" class="town-expiry">This map checks for fresh owner updates automatically while open.</p>
 <a id="town-map-full-link" class="btn btn-dark" target="_blank" rel="noopener noreferrer" hidden>Open marked town on OpenStreetMap ↗</a>
 </section>
-<div class="town-notice"><strong>💚 Please hunt safely.</strong> The pin marks an approximate town centre, not a hidden $50 note, exact address, or confirmation of an active hunt. Always check <a href="https://www.facebook.com/FindTheCashNz/" target="_blank" rel="noopener noreferrer">official Find The Cash NZ Facebook posts</a> for rules, timing and clues. Do not trespass or use your phone while driving.</div>
+<div class="town-notice"><strong>💚 Please hunt safely.</strong> The owner may deliberately pin a specific spot, but a pin by itself does not confirm where cash is hidden or that a hunt is active. Always check <a href="https://www.facebook.com/FindTheCashNz/" target="_blank" rel="noopener noreferrer">official Find The Cash NZ Facebook posts</a> for rules, timing and clues. Do not trespass or use your phone while driving.</div>
 </main>
 <footer class="map-footer"><span>Find The Cash NZ · Good things are out there 💚</span><a href="mailto:findthecashnz@gmail.com">Support: findthecashnz@gmail.com</a></footer>
 </body></html>
