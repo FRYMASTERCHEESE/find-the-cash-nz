@@ -352,6 +352,13 @@ public class MainActivity extends Activity {
         card("Part of a bigger community", "Kiwi kindness shared with friends in New Zealand, the USA and beyond.", "🌏");
         card("Stay safe and respectful", "Follow official Facebook posts for rules, hunt times and any updates. Never pay anyone to claim a prize.", "🛡️");
         button("Privacy policy ↗", false, () -> open(SITE + "privacy.html"));
+        paragraph("Need help with Find The Cash NZ or this closed test? Email findthecashnz@gmail.com.");
+        button("Email app support and tester feedback ✉", true, () -> {
+            String address = getString(R.string.support_email);
+            Intent supportMail = new Intent(Intent.ACTION_SENDTO,
+                    Uri.parse("mailto:" + address + "?subject=Find%20The%20Cash%20NZ%20Closed%20Test%20Feedback"));
+            try { startActivity(supportMail); } catch (Exception ignored) { open("mailto:" + address); }
+        });
         button("Visit our website ↗", true, () -> open(SITE));
         button("Contact & sponsorship enquiries ✉", false, () -> {
             Intent mail = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:findthecashnz@gmail.com?subject=Find%20The%20Cash%20NZ"));

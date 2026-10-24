@@ -19,3 +19,13 @@ The website requires a successful GitHub Pages deployment, and GitHub Settings �
 **Public research snapshot (24 October 2026):** 23K Facebook followers, 94% recommendations (15 reviews), community kindness from NZ to the USA. These figures are not live and no active drop is implied.
 
 To test: `npm run check` with Node 20+. To build Android: import `android/` in Android Studio or let GitHub Actions compile the debug APK. [Release checklist](docs/LAUNCH-CHECKLIST.md) · [Facebook sync setup](docs/FACEBOOK-SYNC.md).
+
+## Google Play — Closed testing only
+
+The owner has created **Find The Cash NZ** in Google Play Console. This repository is configured to prepare the native Android app for **Closed testing only**, not Internal, Open or Production. The Google Play listing support email and tester feedback email are **findthecashnz@gmail.com**. The same support address appears inside the app.
+
+- [Closed-testing setup and private signing instructions](docs/GOOGLE-PLAY-RELEASE.md)
+- [Closed-test signed AAB workflow](.github/workflows/play-release.yml)
+- [Play Store listing copy](store-listing/en-NZ.md)
+
+The signed AAB can be built once the owner securely configures upload signing. GitHub does **not** automatically upload to Play Console or change the Console's support email field. The owner must save that field manually in the app's Store settings.
