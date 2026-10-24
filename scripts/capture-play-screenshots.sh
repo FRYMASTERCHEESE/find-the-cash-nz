@@ -12,14 +12,17 @@ adb install -r android/app/build/outputs/apk/debug/app-debug.apk
 adb shell am start -n nz.findthecash.app.debug/nz.findthecash.app.MainActivity
 sleep 5
 adb exec-out screencap -p > play-assets/screenshots/01-home.png
-# Four equally-spaced native app tabs, just above the Android navigation area.
-adb shell input tap 405 1790
+# Five equally-spaced native app tabs: Home, Updates, Map, Kit, About.
+adb shell input tap 324 1790
 sleep 9
 adb exec-out screencap -p > play-assets/screenshots/02-updates.png
-adb shell input tap 675 1790
+adb shell input tap 540 1790
+sleep 9
+adb exec-out screencap -p > play-assets/screenshots/03-location-map.png
+adb shell input tap 756 1790
 sleep 3
-adb exec-out screencap -p > play-assets/screenshots/03-hunt-kit.png
-adb shell input tap 945 1790
+adb exec-out screencap -p > play-assets/screenshots/04-hunt-kit.png
+adb shell input tap 972 1790
 sleep 3
-adb exec-out screencap -p > play-assets/screenshots/04-about.png
+adb exec-out screencap -p > play-assets/screenshots/05-about.png
 python3 scripts/validate-play-media.py
