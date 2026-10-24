@@ -14,6 +14,12 @@ import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
@@ -48,7 +54,7 @@ public class MainActivity extends Activity {
         "Respect public spaces and other people",
         "Make a safe travel plan"
     };
-    private final String[] tabNames = {"🏠 Home", "📣 Updates", "🧭 Hunt kit", "💚 About"};
+    private final String[] tabNames = {"🏠 Home", "📣 Updates", "📍 Map", "🧭 Kit", "💚 About"};
     // Suggestions are offline and never imply an active cash prize or hunt.
     private final String[] kindnessIdeas = {
         "Thank someone who helped you recently.",
@@ -61,17 +67,33 @@ public class MainActivity extends Activity {
     };
     private SharedPreferences preferences;
     private LinearLayout content;
+    private WebView mapWebView;
     private int selectedTab = 0;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         preferences = getSharedPreferences("findcashnz-kit-v1", MODE_PRIVATE);
-        if (state != null) selectedTab = Math.max(0, Math.min(3, state.getInt("tab", 0)));
+        if (state != null) selectedTab = Math.max(0, Math.min(4, state.getInt("tab", 0)));
         showTab(selectedTab);
     }
     @Override protected void onSaveInstanceState(Bundle state) {
         state.putInt("tab", selectedTab);
         super.onSaveInstanceState(state);
+    }
+    // The map only asks visitors to tap a pin. It never requests GPS permissions,
+    // publishes pins, or forwards coordinates without the email button.
+    private void disposeMapView() {
+        if (mapWebView == null) return;
+        WebView previous = mapWebView;
+        mapWebView = null;
+        previous.stopLoading();
+        ViewParent parent = previous.getParent();
+        if (parent instanceof ViewGroup) ((ViewGroup) parent).removeView(previous);
+        previous.destroy();
+    }
+    @Override protected void onDestroy() {
+        disposeMapView();
+        super.onDestroy();
     }
     private int dp(float value) {
         return Math.round(value * getResources().getDisplayMetrics().density);
@@ -96,6 +118,7 @@ public class MainActivity extends Activity {
         layout.addView(space, new LinearLayout.LayoutParams(1, dp(height)));
     }
     private void showTab(int tab) {
+        disposeMapView();
         selectedTab = tab;
         LinearLayout shell = new LinearLayout(this);
         shell.setOrientation(LinearLayout.VERTICAL);
@@ -122,13 +145,52 @@ public class MainActivity extends Activity {
         header.addView(heading);
         shell.addView(header);
 
-        ScrollView scroll = new ScrollView(this);
-        scroll.setFillViewport(true);
-        content = new LinearLayout(this);
-        content.setOrientation(LinearLayout.VERTICAL);
-        content.setPadding(dp(20), dp(26), dp(20), dp(26));
-        scroll.addView(content);
-        shell.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
+        if (tab == 2) {
+            LinearLayout mapHost = new LinearLayout(this);
+            mapHost.setOrientation(LinearLayout.VERTICAL);
+            mapHost.setPadding(dp(9), dp(10), dp(9), dp(4));
+            TextView instructions = label("📍 Tap the map to pick your location. You decide whether to email it.", 13, INK, true);
+            mapHost.addView(instructions);
+            gap(mapHost, 7);
+            mapWebView = new WebView(this);
+            mapWebView.setBackgroundColor(CREAM);
+            WebSettings settings = mapWebView.getSettings();
+            settings.setJavaScriptEnabled(true);
+            settings.setDomStorageEnabled(false);
+            settings.setAllowFileAccess(false);
+            settings.setAllowContentAccess(false);
+            settings.setGeolocationEnabled(false);
+            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+            // The tile service requires a recognizable application identifier.
+            settings.setUserAgentString(settings.getUserAgentString() +
+                " FindTheCashNZAndroid/1.0 (+https://frymastercheese.github.io/find-the-cash-nz/; contact: findthecashnz@gmail.com)");
+            mapWebView.setWebViewClient(new WebViewClient() {
+                @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                    if (!request.isForMainFrame()) return false;
+                    Uri uri = request.getUrl();
+                    String scheme = uri.getScheme();
+                    String host = uri.getHost();
+                    if ("https".equalsIgnoreCase(scheme)
+                        && "frymastercheese.github.io".equalsIgnoreCase(host)
+                        && uri.getPath() != null && uri.getPath().startsWith("/find-the-cash-nz/"))
+                        return false;
+                    if ("https".equalsIgnoreCase(scheme) || "mailto".equalsIgnoreCase(scheme))
+                        open(uri.toString());
+                    return true;
+                }
+            });
+            mapHost.addView(mapWebView, new LinearLayout.LayoutParams(-1, 0, 1));
+            shell.addView(mapHost, new LinearLayout.LayoutParams(-1, 0, 1));
+            mapWebView.loadUrl(SITE + "location.html");
+        } else {
+            ScrollView scroll = new ScrollView(this);
+            scroll.setFillViewport(true);
+            content = new LinearLayout(this);
+            content.setOrientation(LinearLayout.VERTICAL);
+            content.setPadding(dp(20), dp(26), dp(20), dp(26));
+            scroll.addView(content);
+            shell.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
+        }
 
         LinearLayout bottom = new LinearLayout(this);
         bottom.setOrientation(LinearLayout.HORIZONTAL);
@@ -146,8 +208,9 @@ public class MainActivity extends Activity {
         setContentView(shell);
         switch(tab) {
             case 1: renderUpdates(); break;
-            case 2: renderKit(); break;
-            case 3: renderAbout(); break;
+            case 2: break; // Live, consent-based map is already shown above.
+            case 3: renderKit(); break;
+            case 4: renderAbout(); break;
             default: renderHome();
         }
     }
@@ -212,6 +275,7 @@ public class MainActivity extends Activity {
         gap(content, 23);
         button("💚 Open official Facebook", true, () -> open(FB));
         button("🎬 Watch hunt reels", false, () -> open(REELS));
+        button("📍 My location map", true, () -> showTab(2));
         gap(content, 14);
         sectionLabel("THE COMMUNITY");
         title("A little adventure.\nA lot of heart.");
@@ -343,6 +407,7 @@ public class MainActivity extends Activity {
         gap(content, 10);
         card("Look after each other", "Never trespass, enter unsafe areas, drive distracted or publish other people's photos without permission. Children should hunt with responsible adults.", "💚");
         button("Check real hunt announcements ↗", true, () -> open(FB));
+        button("📍 Place my pin on the map", false, () -> showTab(2));
     }
     private void renderAbout() {
         sectionLabel("FROM AOTEAROA, WITH LOVE");
@@ -365,7 +430,7 @@ public class MainActivity extends Activity {
             try {startActivity(mail);} catch(Exception ignored) {open(SITE);}
         });
         gap(content, 10);
-        paragraph("Privacy: no login, tracking location or bank details. The hunt checklist stays on this phone. Facebook content remains on its original platform.");
+        paragraph("Privacy: no login, automatic location tracking or bank details. Map pins stay on the screen until you choose to email one. Your hunt checklist stays on this phone.");
     }
     private String safeFacebookUrl(String input) {
         try {
