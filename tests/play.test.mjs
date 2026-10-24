@@ -7,7 +7,7 @@ const read = path => readFile(new URL(path, base), 'utf8');
 
 test('Google Play release keeps the expected package and Android 16 target', async () => {
   const gradle = await read('android/app/build.gradle');
-  for (const value of ["applicationId 'nz.findthecash.app'", 'compileSdk 36', 'targetSdk 36', 'versionCode 1']) {
+  for (const value of ["applicationId 'nz.findthecash.app'", 'compileSdk 36', 'targetSdk 36', 'versionCode 2']) {
     assert.ok(gradle.includes(value), value);
   }
 });
