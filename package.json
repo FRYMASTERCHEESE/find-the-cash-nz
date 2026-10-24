@@ -1,0 +1,14 @@
+{
+  "name": "find-the-cash-nz",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Find The Cash NZ companion website and Android app",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check site/app.js && node --check site/sw.js && node --check scripts/sync-facebook.mjs && npm test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
