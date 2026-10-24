@@ -45,6 +45,7 @@ function start() {
   const homeStatus = document.getElementById('home-town-status');
   const homePanel = document.getElementById('home-town-map-panel');
   const homeFrame = document.getElementById('home-town-map-frame');
+  const homeArt = document.getElementById('home-town-art');
   const pageStatus = document.getElementById('town-map-status');
   const pageTown = document.getElementById('town-map-label');
   const pageExpiry = document.getElementById('town-map-expiry');
@@ -61,6 +62,7 @@ function start() {
         ? '📍 Owner-pinned town: ' + name + ', New Zealand'
         : 'No current town pinned by Find The Cash NZ.';
       if (homePanel) homePanel.hidden = !active;
+      if (homeArt) homeArt.hidden = active;
       if (homeFrame && active) {
         const url = embedUrl(data);
         if (homeFrame.src !== url) homeFrame.src = url;
