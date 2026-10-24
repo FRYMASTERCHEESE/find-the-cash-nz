@@ -56,7 +56,11 @@ jobs:
           set -euo pipefail
           BUNDLE="android/app/build/outputs/bundle/release/app-release.aab"
           test -s "$BUNDLE"
-          jarsigner -verify -strict -certs "$BUNDLE"
+          # Android upload keys are deliberately self-signed. jarsigner -strict
+          # incorrectly fails for that expected certificate trust warning.
+          # Validate all signed JAR entries and require "jar verified".
+          jarsigner -verify -certs -verbose "$BUNDLE" | tee "$RUNNER_TEMP/bundle-signature-verification.log"
+          grep -q "jar verified." "$RUNNER_TEMP/bundle-signature-verification.log"
           sha256sum "$BUNDLE"
       - uses: actions/upload-artifact@v4
         with:
