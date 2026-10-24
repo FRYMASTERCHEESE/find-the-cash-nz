@@ -30,4 +30,7 @@ test('public privacy policy does not reintroduce removed social links', async ()
   const privacy = await read('site/privacy.html');
   assert.doesNotMatch(privacy, /TikTok|YouTube/i);
   assert.ok(privacy.includes('Android app'));
+  const activity = await read('android/app/src/main/java/nz/findthecash/app/MainActivity.java');
+  assert.ok(activity.includes('Privacy policy ↗'));
+  assert.ok(privacy.includes('How long information is kept and how to delete it'));
 });

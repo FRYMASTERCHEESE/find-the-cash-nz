@@ -351,6 +351,7 @@ public class MainActivity extends Activity {
         card("Built for real smiles", "The goal is to make someone's day a little brighter—one surprise at a time.", "💛");
         card("Part of a bigger community", "Kiwi kindness shared with friends in New Zealand, the USA and beyond.", "🌏");
         card("Stay safe and respectful", "Follow official Facebook posts for rules, hunt times and any updates. Never pay anyone to claim a prize.", "🛡️");
+        button("Privacy policy ↗", false, () -> open(SITE + "privacy.html"));
         button("Visit our website ↗", true, () -> open(SITE));
         button("Contact & sponsorship enquiries ✉", false, () -> {
             Intent mail = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:findthecashnz@gmail.com?subject=Find%20The%20Cash%20NZ"));
