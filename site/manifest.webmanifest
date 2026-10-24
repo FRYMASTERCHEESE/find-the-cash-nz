@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "Find The Cash NZ",
+  "short_name": "Find Cash NZ",
+  "description": "Real treasure hunts, community and kindness in New Zealand.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#073e2e",
+  "background_color": "#fffcf4",
+  "lang": "en-NZ",
+  "icons": [
+    {
+      "src": "assets/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
