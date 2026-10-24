@@ -1,14 +1,15 @@
 'use strict';
 
-// Public READ-ONLY town display. Only the authenticated owner publishing workflow writes town pins.
+// Public READ-ONLY location display. Only the authenticated owner workflow publishes map pins.
 // No visitor can set pins and no device location or GPS is ever requested.
 export function isVisibleTownPin(data, now = Date.now()) {
   if (!data || typeof data !== 'object' || data.active !== true ||
-      data.source !== 'owner_published' || data.accuracy !== 'approximate_town_centre' ||
+      data.source !== 'owner_published' ||
+      !['approximate_town_centre','owner_selected_coordinates'].includes(data.accuracy) ||
       typeof data.town !== 'string' || data.town.length < 2 || data.town.length > 70 ||
       typeof data.lat !== 'number' || typeof data.lon !== 'number' ||
       !Number.isFinite(data.lat) || !Number.isFinite(data.lon) ||
-      data.lat < -48.5 || data.lat > -33 || data.lon < 165 || data.lon > 180 ||
+      data.lat < -85 || data.lat > 85 || data.lon < -180 || data.lon > 180 ||
       typeof data.expires_at !== 'string') return false;
   const expiry = Date.parse(data.expires_at);
   return Number.isFinite(expiry) && expiry > now;
@@ -18,10 +19,14 @@ export function embedUrl(data) {
   const active = isVisibleTownPin(data);
   const lat = active ? data.lat : -40.9;
   const lon = active ? data.lon : 173.5;
-  const latitudeSpan = active ? 0.09 : 7.2;
-  const longitudeSpan = active ? 0.12 : 6;
-  const bounds = [lon - longitudeSpan, lat - latitudeSpan,
-                  lon + longitudeSpan, lat + latitudeSpan].map(n => n.toFixed(5)).join(',');
+  const exact = active && data.accuracy === 'owner_selected_coordinates';
+  const latitudeSpan = active ? (exact ? 0.004 : 0.09) : 7.2;
+  const longitudeSpan = active ? (exact ? 0.006 : 0.12) : 6;
+  const clamp = (n, low, high) => Math.min(high, Math.max(low, n));
+  const bounds = [
+    clamp(lon - longitudeSpan,-180,180), clamp(lat - latitudeSpan,-85,85),
+    clamp(lon + longitudeSpan,-180,180), clamp(lat + latitudeSpan,-85,85)
+  ].map(n => n.toFixed(6)).join(',');
   const params = new URLSearchParams({bbox: bounds, layer: 'mapnik'});
   if (active) params.set('marker', String(lat) + ',' + String(lon));
   return 'https://www.openstreetmap.org/export/embed.html?' + params.toString();
@@ -30,7 +35,8 @@ export function embedUrl(data) {
 export function fullMapUrl(data) {
   if (!isVisibleTownPin(data)) return 'https://www.openstreetmap.org/';
   const lat = data.lat.toFixed(5), lon = data.lon.toFixed(5);
-  return 'https://www.openstreetmap.org/?mlat=' + lat + '&mlon=' + lon + '#map=12/' + lat + '/' + lon;
+  const zoom = data.accuracy === 'owner_selected_coordinates' ? 17 : 12;
+  return 'https://www.openstreetmap.org/?mlat=' + lat + '&mlon=' + lon + '#map=' + zoom + '/' + lat + '/' + lon;
 }
 
 function formatExpiry(iso) {
@@ -57,10 +63,12 @@ function start() {
   function draw(data) {
     const active = isVisibleTownPin(data);
     const name = active ? data.town : '';
+    const exact = active && data.accuracy === 'owner_selected_coordinates';
+    const locationText = active ? name + (exact ? '' : ', New Zealand') : '';
     if (homeStatus) {
       homeStatus.textContent = active
-        ? '📍 Owner-pinned town: ' + name + ', New Zealand'
-        : 'No current town pinned by Find The Cash NZ.';
+        ? '📍 Owner-pinned location: ' + locationText
+        : 'No current location pinned by Find The Cash NZ.';
       if (homePanel) homePanel.hidden = !active;
       if (homeArt) homeArt.hidden = active;
       if (homeFrame && active) {
@@ -70,12 +78,12 @@ function start() {
     }
     if (pageStatus) {
       pageStatus.textContent = active
-        ? '📍 Find The Cash NZ has pinned ' + name + ', New Zealand.'
-        : 'No town is currently pinned by the owner.';
-      if (pageTown) pageTown.textContent = active ? name + ', NZ' : 'Waiting for the next owner pin 💚';
+        ? '📍 Find The Cash NZ has pinned ' + locationText + '.'
+        : 'No location is currently pinned by the owner.';
+      if (pageTown) pageTown.textContent = active ? locationText : 'Waiting for the next owner pin 💚';
       if (pageExpiry) pageExpiry.textContent = active
         ? 'This owner-posted town pin automatically expires on ' + formatExpiry(data.expires_at) + ' (NZ time).'
-        : 'Only the owner can publish a town; the map never reveals live GPS or a cash location.';
+        : 'Only the owner can publish a pin. No automatic GPS or cash-drop location tracking.';
       if (fullLink) {
         fullLink.hidden = !active;
         if (active) fullLink.href = fullMapUrl(data);
