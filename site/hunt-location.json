@@ -1,0 +1,10 @@
+{
+  "active": false,
+  "town": null,
+  "lat": null,
+  "lon": null,
+  "published_at": null,
+  "expires_at": null,
+  "accuracy": "approximate_town_centre",
+  "source": "owner_published"
+}
