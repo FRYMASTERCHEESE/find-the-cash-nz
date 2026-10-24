@@ -9,7 +9,7 @@ const base=new URL('../site/',import.meta.url);
 const read=path=>readFile(new URL(path,base),'utf8');
 test('Page homepage contains proper landmarks and researched official links',async()=>{
  const h=await read('index.html');
- for(const token of ['<html lang="en-NZ">','<main id="main">','Find The Cash NZ','https://www.facebook.com/FindTheCashNz/','https://www.instagram.com/findthecashnz/','findthecashnz@gmail.com','privacy.html','safety.html','terms.html'])
+ for(const token of ['<html lang="en-NZ">','<main id="main">','Find The Cash NZ','https://www.facebook.com/FindTheCashNz/','https://www.instagram.com/findthecashnz/','findthecashnz@gmail.com','hunt-map.html','privacy.html','safety.html','terms.html'])
  assert.ok(h.includes(token),token);
 });
 test('public site links to Facebook and Instagram only, not YouTube or TikTok',async()=>{
